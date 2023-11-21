@@ -69,7 +69,7 @@ class RedBlackTree:
                 parentOfGrandParent.leftChild = parent
                 parent.rightChild = grandParent
                 grandParent.leftChild = temp
-                parentOfGrandParent.leftChild.color = False
+                parentOfGrandParent.leftChild.colour = False
                 parentOfGrandParent.leftChild.rightChild.colour = True
                 RedBlackTree.flipCount += 2
             else:
@@ -275,9 +275,7 @@ class RedBlackTree:
     def deleteBlackNode(self, node, parentNode, degreeOfNode):
         if degreeOfNode == 0:
             if parentNode.leftChild == node:
-                if (not parentNode.rightChild or not parentNode.rightChild.colour) and ((
-                                                                                                (parentNode.rightChild and not parentNode.rightChild.leftChild) and (parentNode.leftChild.rightChild and not parentNode.rightChild.rightChild))or (
-                        ((parentNode.rightChild and parentNode.rightChild.leftChild) and not parentNode.rightChild.leftChild.colour) and ((parentNode.rightChild and parentNode.rightChild.rightChild) and not parentNode.rightChild.rightChild.colour))):
+                if (not parentNode.rightChild or not parentNode.rightChild.colour) and ((not parentNode.rightChild.leftChild and not parentNode.rightChild.rightChild) or ((parentNode.rightChild.leftChild and not parentNode.rightChild.leftChild.colour) and ( parentNode.rightChild.rightChild and not parentNode.rightChild.rightChild.colour))):
                     parentNode.leftChild = None
                     parentNode.rightChild.colour = True
                     if parentNode.colour:
@@ -369,7 +367,7 @@ class RedBlackTree:
                         self.head.rightChild.colour = False
                         RedBlackTree.flipCount += 1
             elif parentNode.rightChild == node:
-                if (not parentNode.leftChild or not parentNode.leftChild.colour) and ((
+                if (not parentNode.leftChild and not parentNode.leftChild.colour) and ((
                                                                                               not parentNode.leftChild.rightChild and not parentNode.leftChild.leftChild
                                                                                       ) or (
                         (parentNode.leftChild.leftChild and not parentNode.leftChild.leftChild.colour) and (parentNode.leftChild.rightChild and not parentNode.leftChild.rightChild.colour))):
@@ -427,7 +425,7 @@ class RedBlackTree:
                         temp1Colour = parentNode.leftChild.colour
                         if temp1Colour != tempColour:
                             parentNode.leftChild.colour = tempColour
-                            parentNode.colour = tempColour
+                            parentNode.colour = temp1Colour
                             RedBlackTree.flipCount += 2
                         if grandParent.rightChild == parentNode:
                             tempParent = parentNode
@@ -479,6 +477,8 @@ class RedBlackTree:
             else:
                 if node.leftChild and node.leftChild.colour:
                     parentNode.rightChild = node.leftChild
+                    parentNode.rightChild.colour = False
+                    RedBlackTree.flipCount += 1
                 elif node.leftChild:
                     pass  # This case won't arise
                 elif node.rightChild and node.rightChild.colour:
@@ -561,7 +561,7 @@ class RedBlackTree:
                         temp1Colour = parentOfNode.leftChild.colour
                         if temp1Colour != tempColour:
                             parentOfNode.leftChild.colour = tempColour
-                            parentOfNode.colour = tempColour
+                            parentOfNode.colour = temp1Colour
                             RedBlackTree.flipCount += 2
                         if grandParent.rightChild == parentOfNode:
                             tempParent = parentOfNode
@@ -709,58 +709,22 @@ class RedBlackTree:
         else:
             self.deleteNode(node)
 
-    def preOrder(self, node):
-        if not node:
-            return
-        self.preOrder(node.leftChild)
-        print("Node is {0} and node colour is {1}".format(node.book.bookId, node.colour))
-        self.preOrder(node.rightChild)
+    def levelOrder(self, node):
+        i = 0
+        res = dict()
+        res[i] = [node]
+        while res[i]:
+            res[i+1] = []
+            for j in res[i]:
+                if j:
+                    print("node is {0} and colour is {1}".format(j.book.bookId, j.colour))
+                    res[i+1].append(j.leftChild)
+                    res[i+1].append(j.rightChild)
+                else:
+                    print("node is {0} and colour is {1}".format(None, None))
+            print("End of level {0}".format(i))
+            i += 1
 
     def print(self):
-        self.preOrder(self.head)
-
-
-rb = RedBlackTree()
-rb.insert(50, '1', '1', '1')
-rb.insert(25, '1', '1', '1')
-rb.insert(75, '1', '1', '1')
-rb.insert(12, '1', '1', '1')
-rb.insert(37, '1', '1', '1')
-rb.deleteBook(12)
-
-rb.insert(30, '1', '1', '1')
-rb.insert(70, '1', '1', '1')
-rb.insert(15, '1', '1', '1')
-rb.insert(40, '1', '1', '1')
-rb.insert(60, '1', '1', '1')
-rb.deleteBook(60)
-
-rb.insert(20, '1', '1', '1')
-rb.insert(45, '1', '1', '1')
-rb.insert(55, '1', '1', '1')
-rb.deleteBook(55)
-rb.insert(65, '1', '1', '1')
-rb.deleteBook(37)
-
-rb.insert(80, '1', '1', '1')
-rb.insert(10, '1', '1', '1')
-rb.deleteBook(25)
-rb.insert(5, '1', '1', '1')
-rb.insert(35, '1', '1', '1')
-
-rb.insert(42, '1', '1', '1')
-rb.insert(23, '1', '1', '1')
-rb.deleteBook(45)
-rb.insert(48, '1', '1', '1')
-rb.insert(90, '1', '1', '1')
-rb.insert(100, '1', '1', '1')
-rb.deleteBook(48)
-
-rb.deleteBook(35)
-rb.insert(28, '1', '1', '1')
-rb.insert(33, '1', '1', '1')
-rb.deleteBook(50)
-rb.insert(72, '1', '1', '1')
-
-rb.print()
+        self.levelOrder(self.head)
 
