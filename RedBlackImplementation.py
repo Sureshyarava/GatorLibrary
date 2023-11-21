@@ -263,34 +263,21 @@ class RedBlackTree:
                     parentOfNode.rightChild = node.rightChild
         else:
             highestBookOnLeftSubTree = RedBlackTree.findHighestBookFromLeftSubTree(node)
+            parentOfHighestBookOnLeftSubTree = self.findParentOfChild(highestBookOnLeftSubTree)
+            node.book = highestBookOnLeftSubTree.book
+            degreeOfLeastNodeOnSubtree = 2 if (highestBookOnLeftSubTree.rightChild and highestBookOnLeftSubTree.leftChild) else 1
+            degreeOfLeastNodeOnSubtree = 0 if not highestBookOnLeftSubTree.rightChild and not highestBookOnLeftSubTree.leftChild else degreeOfLeastNodeOnSubtree
             if not highestBookOnLeftSubTree.colour:
-                parentOfLeastBookOnRightSubTree = self.findParentOfChild(highestBookOnLeftSubTree)
-                degreeOfLeastNodeOnSubtree = 2 if (
-                            highestBookOnLeftSubTree.rightChild and highestBookOnLeftSubTree.leftChild) else 1
-                degreeOfLeastNodeOnSubtree = 0 if not highestBookOnLeftSubTree.rightChild and not highestBookOnLeftSubTree.leftChild else degreeOfLeastNodeOnSubtree
-                self.deleteBlackNode(highestBookOnLeftSubTree, parentOfLeastBookOnRightSubTree,
-                                     degreeOfLeastNodeOnSubtree)
-                highestBookOnLeftSubTree.colour = True
-                RedBlackTree.flipCount += 1
+                self.deleteBlackNode(highestBookOnLeftSubTree, parentOfHighestBookOnLeftSubTree, degreeOfLeastNodeOnSubtree)
             else:
-                parentOfLeastBookOnRightSubTree = self.findParentOfChild(highestBookOnLeftSubTree)
-                degreeOfLeastNodeOnSubtree = 2 if highestBookOnLeftSubTree.rightChild and highestBookOnLeftSubTree.leftChild else 1
-                degreeOfLeastNodeOnSubtree = 0 if not highestBookOnLeftSubTree.rightChild and not highestBookOnLeftSubTree.leftChild else degreeOfLeastNodeOnSubtree
-                self.deleteRedNode(highestBookOnLeftSubTree, parentOfLeastBookOnRightSubTree, degreeOfLeastNodeOnSubtree)
-            highestBookOnLeftSubTree.rightChild = node.rightChild
-            highestBookOnLeftSubTree.leftChild = node.leftChild
-
-            if parentOfNode.leftChild == node:
-                parentOfNode.leftChild = highestBookOnLeftSubTree
-            else:
-                parentOfNode.rightChild = highestBookOnLeftSubTree
+                self.deleteRedNode(highestBookOnLeftSubTree, parentOfHighestBookOnLeftSubTree, degreeOfLeastNodeOnSubtree)
 
     def deleteBlackNode(self, node, parentNode, degreeOfNode):
         if degreeOfNode == 0:
             if parentNode.leftChild == node:
                 if (not parentNode.rightChild or not parentNode.rightChild.colour) and ((
-                                                                                                not parentNode.rightChild.leftChild and not parentNode.rightChild.rightChild) or (
-                        (parentNode.rightChild.leftChild and not parentNode.rightChild.leftChild.colour) and (parentNode.rightChild.rightChild and not parentNode.rightChild.rightChild.colour))):
+                                                                                                (parentNode.rightChild and not parentNode.rightChild.leftChild) and (parentNode.leftChild.rightChild and not parentNode.rightChild.rightChild))or (
+                        ((parentNode.rightChild and parentNode.rightChild.leftChild) and not parentNode.rightChild.leftChild.colour) and ((parentNode.rightChild and parentNode.rightChild.rightChild) and not parentNode.rightChild.rightChild.colour))):
                     parentNode.leftChild = None
                     parentNode.rightChild.colour = True
                     if parentNode.colour:
@@ -298,7 +285,7 @@ class RedBlackTree:
                         RedBlackTree.flipCount += 1
                     else:
                         self.delete_fix(parentNode, self.findParentOfChild(parentNode))
-                elif parentNode.rightChild.colour:
+                elif parentNode.rightChild and parentNode.rightChild.colour:
                     parentNode.colour = True
                     parentNode.rightChild.colour = False
                     RedBlackTree.flipCount += 2
@@ -328,7 +315,7 @@ class RedBlackTree:
                             temp1.rightChild = temp
                             temp1.leftChild = None
                             self.delete_fix(None, parentNode)
-                elif not parentNode.rightChild.colour and (parentNode.rightChild.leftChild and parentNode.rightChild.leftChild.colour) and (
+                elif (parentNode.rightChild and not parentNode.rightChild.colour) and (parentNode.rightChild.leftChild and parentNode.rightChild.leftChild.colour) and (
                         not parentNode.rightChild.rightChild or (parentNode.rightChild.rightChild and not parentNode.rightChild.rightChild.colour)):
                     parentNode.rightChild.colour = True
                     parentNode.rightChild.leftChild.colour = False
@@ -338,8 +325,8 @@ class RedBlackTree:
                     parentNode.rightChild = parentNode.rightChild.leftChild
                     parentNode.rightChild.rightChild = temp
                     parentNode.rightChild.rightChild.leftChild = tempRight
-                    self.deleteNode(node)
-                elif not parentNode.rightChild.colour and (parentNode.rightChild.rightChild and parentNode.rightChild.rightChild.colour):
+                    self.deleteBlackNode(node, parentNode, degreeOfNode)
+                elif (parentNode.rightChild and not parentNode.rightChild.colour) and (parentNode.rightChild.rightChild and parentNode.rightChild.rightChild.colour):
                     grandParent = self.findParentOfChild(parentNode)
                     if grandParent:
                         tempColour = parentNode.colour
@@ -355,9 +342,8 @@ class RedBlackTree:
                             grandParent.rightChild.leftChild = tempParent
                             tempParent.leftChild = None
                             tempParent.rightChild = temp
-                            if not grandParent.rightChild.rightChild.colour:
-                                grandParent.rightChild.rightChild.colour = False
-                                RedBlackTree.flipCount += 1
+                            grandParent.rightChild.rightChild.colour = False
+                            RedBlackTree.flipCount += 1
                         else:
                             tempParent = parentNode
                             temp = parentNode.rightChild.leftChild
@@ -365,9 +351,8 @@ class RedBlackTree:
                             grandParent.leftChild.leftChild = tempParent
                             tempParent.leftChild = None
                             tempParent.rightChild = temp
-                            if not grandParent.leftChild.rightChild.colour:
-                                grandParent.leftChild.rightChild.colour = False
-                                RedBlackTree.flipCount += 1
+                            grandParent.leftChild.rightChild.colour = False
+                            RedBlackTree.flipCount += 1
                     elif self.head == parentNode and not grandParent:
                         tempColour = parentNode.colour
                         temp1Colour = parentNode.rightChild.colour
@@ -425,7 +410,7 @@ class RedBlackTree:
                             temp1.leftChild = temp
                             temp1.rightChild = None
                             self.delete_fix(None, parentNode)
-                elif not parentNode.leftChild.colour and parentNode.leftChild.rightChild.colour and (not parentNode.leftChild.leftChild or (parentNode.leftChild.leftChild and not parentNode.leftChild.leftChild.colour)):
+                elif not parentNode.leftChild.colour and (parentNode.leftChild.rightChild and parentNode.leftChild.rightChild.colour) and (not parentNode.leftChild.leftChild or (parentNode.leftChild.leftChild and not parentNode.leftChild.leftChild.colour)):
                     parentNode.leftChild.colour = True
                     parentNode.leftChild.rightChild.colour = False
                     RedBlackTree.flipCount += 2
@@ -504,30 +489,15 @@ class RedBlackTree:
                     pass  # This case won't arise
         else:
             highestNodeOnLeftSubtree = RedBlackTree.findHighestBookFromLeftSubTree(node)
+            parentOfHighestBookOnLeftSubTree = self.findParentOfChild(highestNodeOnLeftSubtree)
+            node.book = highestNodeOnLeftSubtree.book
+            degreeOfLeastNodeOnSubtree = 2 if highestNodeOnLeftSubtree.rightChild and highestNodeOnLeftSubtree.leftChild else 1
+            degreeOfLeastNodeOnSubtree = 0 if not highestNodeOnLeftSubtree.rightChild and not highestNodeOnLeftSubtree.leftChild else degreeOfLeastNodeOnSubtree
             if not highestNodeOnLeftSubtree.colour:
-                parentOfLeastBookOnRightSubTree = self.findParentOfChild(highestNodeOnLeftSubtree)
-                degreeOfLeastNodeOnSubtree = 2 if highestNodeOnLeftSubtree.rightChild and highestNodeOnLeftSubtree.leftChild else 1
-                degreeOfLeastNodeOnSubtree = 0 if not highestNodeOnLeftSubtree.rightChild and not highestNodeOnLeftSubtree.leftChild else degreeOfLeastNodeOnSubtree
-                self.deleteBlackNode(highestNodeOnLeftSubtree, parentOfLeastBookOnRightSubTree,
+                self.deleteBlackNode(highestNodeOnLeftSubtree, parentOfHighestBookOnLeftSubTree,
                                      degreeOfLeastNodeOnSubtree)
             else:
-                parentOfLeastBookOnRightSubTree = self.findParentOfChild(highestNodeOnLeftSubtree)
-                degreeOfLeastNodeOnSubtree = 2 if highestNodeOnLeftSubtree.rightChild and highestNodeOnLeftSubtree.leftChild else 1
-                degreeOfLeastNodeOnSubtree = 0 if not highestNodeOnLeftSubtree.rightChild and not highestNodeOnLeftSubtree.leftChild else degreeOfLeastNodeOnSubtree
-                self.deleteRedNode(highestNodeOnLeftSubtree, parentOfLeastBookOnRightSubTree, degreeOfLeastNodeOnSubtree)
-                highestNodeOnLeftSubtree.colour = False
-                RedBlackTree.flipCount += 1
-            tempRightChild = node.rightChild
-            tempLeftChild = node.leftChild
-            highestNodeOnLeftSubtree.rightChild = tempRightChild
-            highestNodeOnLeftSubtree.leftChild = tempLeftChild
-            if parentNode:
-                if parentNode.leftChild == node:
-                    parentNode.leftChild = highestNodeOnLeftSubtree
-                else:
-                    parentNode.rightChild = highestNodeOnLeftSubtree
-            else:
-                self.head = highestNodeOnLeftSubtree
+                self.deleteRedNode(highestNodeOnLeftSubtree, parentOfHighestBookOnLeftSubTree, degreeOfLeastNodeOnSubtree)
 
     def delete_fix(self, node, parentOfNode):
         if self.head == node:
@@ -751,24 +721,46 @@ class RedBlackTree:
 
 
 rb = RedBlackTree()
-rb.insert(23, '1', '1', '1')
-rb.insert(7, '1', '1', '1')
-rb.insert(59, '1', '1', '1')
-rb.insert(56, '1', '1', '1')
-rb.insert(2, '1', '1', '1')
-rb.insert(35, '1', '1', '1')
-rb.insert(53, '1', '1', '1')
-rb.insert(3, '1', '1', '1')
-rb.insert(88, '1', '1', '1')
-rb.insert(26, '1', '1', '1')
-rb.insert(22, '1', '1', '1')
-rb.insert(92, '1', '1', '1')
-rb.insert(49, '1', '1', '1')
-rb.insert(98, '1', '1', '1')
+rb.insert(50, '1', '1', '1')
+rb.insert(25, '1', '1', '1')
 rb.insert(75, '1', '1', '1')
-rb.insert(58, '1', '1', '1')
-rb.insert(62, '1', '1', '1')
-rb.print()
+rb.insert(12, '1', '1', '1')
+rb.insert(37, '1', '1', '1')
+rb.deleteBook(12)
+
+rb.insert(30, '1', '1', '1')
+rb.insert(70, '1', '1', '1')
+rb.insert(15, '1', '1', '1')
+rb.insert(40, '1', '1', '1')
+rb.insert(60, '1', '1', '1')
+rb.deleteBook(60)
+
+rb.insert(20, '1', '1', '1')
+rb.insert(45, '1', '1', '1')
+rb.insert(55, '1', '1', '1')
+rb.deleteBook(55)
+rb.insert(65, '1', '1', '1')
+rb.deleteBook(37)
+
+rb.insert(80, '1', '1', '1')
+rb.insert(10, '1', '1', '1')
+rb.deleteBook(25)
+rb.insert(5, '1', '1', '1')
+rb.insert(35, '1', '1', '1')
+
+rb.insert(42, '1', '1', '1')
+rb.insert(23, '1', '1', '1')
+rb.deleteBook(45)
+rb.insert(48, '1', '1', '1')
+rb.insert(90, '1', '1', '1')
+rb.insert(100, '1', '1', '1')
+rb.deleteBook(48)
+
 rb.deleteBook(35)
-print("deleted node 35")
+rb.insert(28, '1', '1', '1')
+rb.insert(33, '1', '1', '1')
+rb.deleteBook(50)
+rb.insert(72, '1', '1', '1')
+
 rb.print()
+
