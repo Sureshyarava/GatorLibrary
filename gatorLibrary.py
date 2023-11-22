@@ -9,6 +9,7 @@ redBlackTree = None  # Red black tree object reference
 writeFileObject = None  # object reference for writing into a file
 
 
+# Function to print information about a book node
 def PrintBookNode(res):
     writeFileObject.write('BookID = {0}\n'.format(res.book.bookId))
     writeFileObject.write('Title = "{0}"\n'.format(res.book.bookName))
@@ -24,6 +25,7 @@ def PrintBookNode(res):
         writeFileObject.write("Reservations = []\n")
 
 
+# Function to print information about a specific book
 def PrintBook(book_Id):
     res = redBlackTree.findNode(book_Id)
     if res:
@@ -33,6 +35,7 @@ def PrintBook(book_Id):
         writeFileObject.write(res)
 
 
+# Function to print information about books within a specified range
 def PrintBooks(book_ID1, book_ID2):
     res = redBlackTree.getPreOrder(redBlackTree.head)
     for i in res:
@@ -41,10 +44,12 @@ def PrintBooks(book_ID1, book_ID2):
             writeFileObject.write("\n")
 
 
+# Function to insert a new book into the library
 def InsertBook(book_ID, bookName, authorName, availabilityStatus, borrowedBy=None, Heap=None):
     redBlackTree.insert(book_ID, bookName, authorName, availabilityStatus, borrowedBy, Heap)
 
 
+# Function to handle book borrowing by a patron
 def BorrowBook(patron_ID, book_ID, patron_Priority):
     node = redBlackTree.findNode(book_ID)
     if node.book.availabilityStatus == 'Yes':
@@ -59,6 +64,7 @@ def BorrowBook(patron_ID, book_ID, patron_Priority):
         writeFileObject.write("Book {0} Reserved by Patron {1}\n".format(book_ID, patron_ID))
 
 
+# Function to handle book return by a patron
 def ReturnBook(patron_ID, book_ID):
     writeFileObject.write("Book {0} Returned by Patron {1}\n".format(book_ID, patron_ID))
     node = redBlackTree.findNode(book_ID)
@@ -74,6 +80,7 @@ def ReturnBook(patron_ID, book_ID):
         node.book.borrowedBy = None
 
 
+# Function to delete a book from the library
 def DeleteBook(book_ID):
     node = redBlackTree.findNode(book_ID)
     if node.book.reservationHeap:
@@ -97,23 +104,28 @@ def DeleteBook(book_ID):
         writeFileObject.write("Book {0} is no longer available\n".format(book_ID))
     redBlackTree.deleteNode(node)
 
+
+# Function to quit the program
 def Quit():
     writeFileObject.write("Program Terminated!!\n")
     writeFileObject.close()
     sys.exit()
 
 
+# Function to print the color flip count of the red-black tree
 def ColorFlipCount():
     temp = redBlackTree.flipCount
     writeFileObject.write("Colour Flip Count: {0}\n".format(temp))
 
 
+# Function to strip the line from the input File
 def stripLine(String):
     strippedLine = str(String.strip())
     strippedLine = strippedLine[strippedLine.index("(") + 1:-1]
     return strippedLine.split(", ")
 
 
+# Function to find the book closest to a specified target ID
 def FindClosestBook(targetID):
     res = redBlackTree.getPreOrder(redBlackTree.head)
     result = []
@@ -127,6 +139,7 @@ def FindClosestBook(targetID):
 
 
 if __name__ == '__main__':
+    # Read input file and initialize Red-Black tree
     inputFileName = sys.argv[1]
     redBlackTree = RedBlackTree()
     fileLocation = "./{0}".format(inputFileName)
@@ -135,7 +148,9 @@ if __name__ == '__main__':
     writeFileObject = outPutFile
     inputFile = open(fileLocation, "r")
     Lines = inputFile.readlines()
+    # Process each line in the input file
     for line in Lines:
+        # Check the command type and perform the corresponding action
         inputParameters = stripLine(line)
         if "PrintBooks" in line:
             bookID1 = int(inputParameters[0])
@@ -158,7 +173,7 @@ if __name__ == '__main__':
             pattern = r'BorrowBook\((\d+), (\d+), (\d+)\)'
             match = re.match(pattern, line)
             if match:
-                # Extract values using group() method
+                # Extracting values using group() method
                 patronID = match.group(1)
                 bookID = match.group(2)
                 patronPriority = match.group(3)
