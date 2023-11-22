@@ -56,7 +56,7 @@ class ReservationHeap:
     def push(self, patronID, priorityNumber):
         if self.heapSize >= 20:
             print("Wait list is Fill")
-            return
+            return -1
         node = Node(patronID, priorityNumber)
         self.heapSize += 1
         self.heap.append(node)
@@ -70,11 +70,16 @@ class ReservationHeap:
                 index = self.getParentIndex(index)
             else:
                 break
+        return 0
 
     def removeMin(self):
         if self.heapSize == 0:
-            print("The reservation heap is Empty")
-            return None
+            return -2
+        elif self.heapSize == 1:
+            temp = self.heap[0]
+            self.heapSize -= 1
+            self.heap = []
+            return temp
         temp = self.heap[0]
         self.heap[0] = self.heap.pop(-1)
         self.heapSize -= 1
@@ -151,7 +156,6 @@ class ReservationHeap:
         for i in self.heap:
             print(i.patronID, end=" ")
         print()
-
 
 # b = ReservationHeap(201,1)
 # b.push(202,2)
